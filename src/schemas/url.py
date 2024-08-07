@@ -30,7 +30,8 @@ class URLBase(BaseModel):
     expiration: Annotated[
         datetime | None, 
         Query(
-            description="Expiration date of the URL"
+            description="Expiration date of the URL",
+            example=datetime.now()
             )
         ] = Field(None, example=datetime.now())
 
@@ -84,9 +85,6 @@ class URLUpdate(URLBase):
             description="Expiration date of the URL"
             )
         ] = Field(None, example=datetime.now())
-
-class URLDelete(URLBase):
-    pass
 
 class URLResponse(URLWithId):
     pass

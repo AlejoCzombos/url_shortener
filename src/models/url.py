@@ -12,7 +12,7 @@ class URLBase(BaseModel):
     expiration: Optional[datetime]
     password: Optional[str]
 
-class URLCreate(URLBase):
+class URLIn(URLBase):
     pass
 
 class URLInDB(URLBase):

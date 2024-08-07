@@ -18,5 +18,5 @@ class URLIn(URLBase):
 class URLInDB(URLBase):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
 
-class URLCollection(BaseModel):
+class URLCollectionDB(BaseModel):
     urls: List[URLInDB]

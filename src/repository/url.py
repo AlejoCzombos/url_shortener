@@ -1,5 +1,5 @@
 from ..db import urls_collection
-from ..models.url import URLInDB, URLIn, URLCollection
+from ..models.url import URLInDB, URLIn, URLCollectionDB
 from bson import ObjectId
 
 async def create_url_db(url_in: URLIn):
@@ -51,7 +51,7 @@ async def get_all_urls_db():
         if 'password' not in url:
             url['password'] = None
     
-    return URLCollection(urls=urls_db)
+    return URLCollectionDB(urls=urls_db)
 
 async def get_url_by_id_or_alias_db(id_or_alias: str):
     alias_is_valid = ObjectId.is_valid(id_or_alias)

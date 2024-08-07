@@ -1,9 +1,12 @@
 from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import RedirectResponse
+from datetime import datetime
 
 from ..repository.url import create_url_db, update_url_db, delete_url_db, get_url_by_id_or_alias_db, get_all_urls_db
-from ..models.url import URLInDB, URLIn, URLCollection as URLCollectionDB 
+from ..models.url import URLInDB, URLCollectionDB
 from ..schemas.url import URLCreate, URLCollection, URLUpdate, URLResponse, PasswordParam, IdOrAliasParam
+
+from ..mappers.url import url_collection_in_db_to_url_response, url_in_db_to_url_response
 
 router = APIRouter(
     prefix="/urls",
@@ -21,8 +24,9 @@ router = APIRouter(
     )
 async def get_all_urls():
     urls_db : URLCollectionDB = await get_all_urls_db()
+    
     #Mapping the URLInDB model to the URLResponse model
-    urls = URLCollection(urls=[URLResponse(**url.model_dump()) for url in urls_db.urls])
+    urls : URLCollection = url_collection_in_db_to_url_response(urls_db)
     return urls
 
 @router.get(
@@ -38,6 +42,10 @@ async def redirect_to_url(id_or_alias: IdOrAliasParam, password: PasswordParam =
     if url_db == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="URL not found")
     
+    if url_db["expiration"] and url_db["expiration"] < datetime.now():
+        await delete_url_db(url_db["_id"])
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="URL expired")
+        
     if url_db["password"] and password != url_db["password"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
     
@@ -58,8 +66,9 @@ async def create_url(url: URLCreate):
     if url_created is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Alias already exists")
     
-    URLResponse(**url_created.model_dump())
-    return url_created
+    url_response = url_in_db_to_url_response(url_created)
+    
+    return url_response
 
 @router.put(
     "/{url_id}",
@@ -69,14 +78,15 @@ async def create_url(url: URLCreate):
     response_model=URLResponse,
     response_model_by_alias=False,
     )
-async def update_url(url_id: IdOrAliasParam, url: URLCreate):
+async def update_url(url_id: IdOrAliasParam, url: URLUpdate):
     url_updated : URLInDB = await update_url_db(url, url_id)
     
     if url_updated is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="URL not found")
     
-    URLResponse(**url_updated.model_dump())
-    return url_updated
+    url_response = url_in_db_to_url_response(url_updated)
+    
+    return url_response
 
 @router.delete(
     "/{url_id}",

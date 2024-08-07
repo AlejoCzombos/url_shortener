@@ -87,10 +87,16 @@ class URLUpdate(URLBase):
         ] = Field(None, example=datetime.now())
 
 class URLResponse(URLWithId):
-    pass
+    has_password: Annotated[
+        bool,
+        Query(
+            description="Indicates if the URL has a password",
+            example=False
+            )
+        ] = Field(False, example=False)
 
 class URLCollection(BaseModel):
-    urls: List[URLWithId]
+    urls: List[URLResponse]
 
 IdOrAliasParam = Annotated[
     str,

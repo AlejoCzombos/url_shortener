@@ -1,8 +1,11 @@
+from bson import ObjectId
+from datetime import datetime
+from fastapi import Request
+
 from ..db import urls_collection
 from ..models.url import URLInDB, URLIn, URLCollectionDB
-from bson import ObjectId
 
-async def create_url_db(url_in: URLIn):
+async def create_url_db(url_in: URLIn, request: Request):
     url = URLIn(**url_in.model_dump())
     
     alias_exists = await urls_collection.find({"alias": url.alias}).to_list(1)
@@ -10,6 +13,10 @@ async def create_url_db(url_in: URLIn):
         return None
     
     url_data = url.model_dump(by_alias=True)
+    
+    url_data.created_at = datetime.now()
+    url_data.short_url = request.base_url + "/urls/" + url_data.alias
+    
     new_url = await urls_collection.insert_one(url_data)
     url_created = await urls_collection.find_one({"_id": new_url.inserted_id})
     
@@ -46,8 +53,12 @@ async def get_all_urls_db():
             url['description'] = None
         if 'alias' not in url:
             url['alias'] = None
-        if 'expiration' not in url:
-            url['expiration'] = None
+        if 'expires_at' not in url:
+            url['expires_at'] = None
+        if 'created_at' not in url:
+            url['created_at'] = None
+        if 'short_url' not in url:
+            url['short_url'] = None
         if 'password' not in url:
             url['password'] = None
     
@@ -60,8 +71,8 @@ async def get_url_by_id_or_alias_db(id_or_alias: str):
         url_db: URLInDB = await urls_collection.find_one({"_id": ObjectId(id_or_alias)})
         return url_db
     
-    url_db: URLInDB = await urls_collection.find_one({"alias": id_or_alias})
-    return url_db
+    url_db = await urls_collection.find_one({"alias": id_or_alias})
+    return URLInDB(**url_db)
 
 async def get_url_by_id_db(url_id: str):
     url_data = await urls_collection.find_one({"_id": ObjectId(url_id)})

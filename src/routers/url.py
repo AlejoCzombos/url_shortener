@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from datetime import datetime
 
@@ -28,6 +28,25 @@ async def get_all_urls():
     #Mapping the URLInDB model to the URLResponse model
     urls : URLCollection = url_collection_in_db_to_url_response(urls_db)
     return urls
+
+@router.get(
+    "/get/{id_or_alias}",
+    name="Get URL by ID or Alias",
+    response_description="URL retrieved successfully",
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
+    response_model=URLResponse,
+)
+async def get_url_by_id_or_alias(id_or_alias: IdOrAliasParam):
+    url_db: URLInDB = await get_url_by_id_or_alias_db(id_or_alias)
+    
+    if url_db == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="URL not found")
+    
+    url_response = url_in_db_to_url_response(url_db)
+    
+    return url_response
+
 
 @router.get(
     "/{id_or_alias}",
@@ -60,7 +79,7 @@ async def redirect_to_url(id_or_alias: IdOrAliasParam, password: PasswordParam =
     response_model=URLResponse,
     response_model_by_alias=False,
     )
-async def create_url(url: URLCreate):
+async def create_url(url: URLCreate, request: Request):
     url_created : URLInDB = await create_url_db(url)
     
     if url_created is None:

@@ -4,13 +4,21 @@ from typing import List, Annotated
 from datetime import datetime
 
 class URLBase(BaseModel):
-    url: Annotated[
+    original_url: Annotated[
         str, 
         Query(
             description="URL to be shortened", 
             max_length=200, 
             min_length=1)
         ] = Field(..., example="https://www.google.com")
+    short_url: Annotated[
+        str | None,
+        Query(
+            description="Shortened URL",
+            max_length=50,
+            min_length=3
+            )
+        ] = Field(None, example="http://localhost:8000/google")
     description: Annotated[
         str | None, 
         Query(
@@ -27,13 +35,21 @@ class URLBase(BaseModel):
             min_length=3
             )
         ] = Field(None, example="google")
-    expiration: Annotated[
+    expires_at: Annotated[
         datetime | None, 
         Query(
             description="Expiration date of the URL",
             example=datetime.now()
             )
         ] = Field(None, example=datetime.now())
+    created_at: Annotated[
+        datetime | None, 
+        Query(
+            description="Creation date of the URL",
+            example=datetime.now()
+            )
+        ] = Field(None, example=datetime.now())
+    
 
 class URLCreate(URLBase):
     password: Annotated[
@@ -56,7 +72,7 @@ class URLWithId(URLBase):
         ] = Field(default="None" , example="60f7b3b3d9f3f3b3d9f3f3b3")
 
 class URLUpdate(URLBase):
-    url: Annotated[
+    original_url: Annotated[
         str | None, 
         Query(
             description="URL to be shortened", 
@@ -79,12 +95,20 @@ class URLUpdate(URLBase):
             min_length=3
             )
         ] = Field(None, example="google")
-    expiration: Annotated[
+    expires_at: Annotated[
         datetime | None, 
         Query(
             description="Expiration date of the URL"
             )
         ] = Field(None, example=datetime.now())
+    password: Annotated[
+        str | None,
+    # 4 characters or more, at least 1 uppercase, 1 lowercase, 1 number, no spaces
+        Query(
+            description="Password to access the URL",
+            #regex="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?!.* ).{4,}$"
+            )
+        ] = Field(None, example="Hello123")
 
 class URLResponse(URLWithId):
     has_password: Annotated[

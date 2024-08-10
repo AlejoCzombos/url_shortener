@@ -6,10 +6,12 @@ from typing import List, Annotated, Optional
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 class URLBase(BaseModel):
-    url: str
+    original_url: str
+    short_url: Optional[str]
     description: Optional[str]
     alias: Optional[str]
-    expiration: Optional[datetime]
+    expires_at: Optional[datetime]
+    created_at: Optional[datetime]
     password: Optional[str]
 
 class URLIn(URLBase):

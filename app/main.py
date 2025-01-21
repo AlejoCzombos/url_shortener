@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from src.routers import url
+
+from app.router import despacho 
 
 app = FastAPI()
 
-app.include_router(url.router)
+app.include_router(despacho.router)
 
-@app.get("/", tags=["root"])
+@app.get("/")
 async def read_root():
     return {"Server is running."}

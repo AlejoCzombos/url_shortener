@@ -14,3 +14,12 @@ router = APIRouter(
 async def web_hook(data: dict):
     print("Data recibida:", data)
     return data
+
+@router.put(
+    "/",
+    status_code=status.HTTP_200_OK
+)
+async def web_hook(data: dict):
+    print("Data recibida:", data)
+    print("Token:", head)
+    return data

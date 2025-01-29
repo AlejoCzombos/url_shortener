@@ -3,3 +3,7 @@ uvicorn[standard]
 motor
 pydantic
 python-dotenv
+requests
+pyodbc
+
+PyJWT

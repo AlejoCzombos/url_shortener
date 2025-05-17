@@ -4,6 +4,6 @@ motor
 pydantic
 python-dotenv
 requests
-pyodbc
 
 PyJWT
+slowapi

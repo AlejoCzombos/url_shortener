@@ -1,0 +1,10 @@
+services:
+  doc24-hook:
+    image: alejoczombos/doc24-hook:latest
+    ports:
+      - "8000:8000"
+    restart: always
+    env_file:
+      - .env
+    environment:
+      ENDPOINT_URL: ${ENDPOINT_URL}
